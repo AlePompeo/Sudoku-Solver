@@ -1,10 +1,12 @@
 # 🧩 Parallel Sudoku Solver in C
 
-A high-performance Sudoku solver written in C, combining a classic **Depth First Search (DFS)** backtracking algorithm with **POSIX multithreading** (`pthreads`) and **OpenMP** compiler optimizations.
+> A fast **Sudoku solver in C**: depth-first search with backtracking, one **pthread** per candidate branch and OpenMP-optimized builds. Solves the default puzzle in about **0.05 s**.
 
-> ⚡ Fastest recorded run on a Ryzen Mobile (6-core CPU): **0.054 seconds**
+![C](https://img.shields.io/badge/C-A8B9CC?logo=c&logoColor=black) ![pthreads](https://img.shields.io/badge/POSIX-pthreads-1f6feb) ![OpenMP](https://img.shields.io/badge/OpenMP-enabled-2e7d32) ![License](https://img.shields.io/badge/License-MPL--2.0-orange)
+
 
 ---
+
 
 ## 🚀 Features
 
@@ -19,11 +21,11 @@ A high-performance Sudoku solver written in C, combining a classic **Depth First
 
 ### Requirements
 - GCC with OpenMP support
-- POSIX-compatible OS (Linux / macOS)
+- A POSIX system with `pthreads` (Linux / macOS)
 
 ### Compile
 ```bash
-gcc -fopenmp sudoku.c -o sudoku
+gcc -fopenmp -pthread solver.c -o sudoku
 ```
 
 ### Run
@@ -73,7 +75,7 @@ For a candidate digit `n` at position `(row, col)`, the function checks three co
 
 ## 📋 Predefined Puzzles
 
-The project ships with four built-in Sudoku puzzles (`problem1` – `problem4`) of varying difficulty. Switch between them in `main()`:
+`solver.c` ships with four built-in Sudoku puzzles (`problem1` – `problem4`) of varying difficulty. The default is `problem4`; switch in `main()`:
 
 ```c
 solve(&problem4);  // change to problem1, problem2, or problem3
@@ -99,8 +101,14 @@ The solved grid is printed with visual separators between the 3×3 boxes:
 
 ```
 .
-└── sudoku.c       # Single-file implementation
+├── solver.c       # Self-contained solver: DFS, threads, puzzles and main() (build this one)
+├── main.c         # Alternative test harness: picks puzzle 1-4 from argv, prints and validates
+├── validator.c    # validate(): checks a finished grid
+├── problems.h     # Puzzles used by the harness
+└── LICENSE        # MPL-2.0
 ```
+
+`main.c`, `validator.c` and `problems.h` are a separate harness that expects a `solve()` without its own `main()`; the default build above does not use them.
 
 ---
 
@@ -108,10 +116,15 @@ The solved grid is printed with visual separators between the 3×3 boxes:
 
 - The polling loop in `solve()` is a **busy-wait** — suitable for short-lived solver threads but not ideal for long-running workloads.
 - Thread safety relies on each thread operating on its **own copy** of the board, so no mutexes are needed.
-- The `-fopenmp` flag enables OpenMP's runtime optimizations even if no explicit `#pragma omp` directives are used in this version.
+- The `-fopenmp` flag is the one recommended in the source for best performance, although this version has no explicit `#pragma omp` directive.
+- The fastest run recorded by the author was 0.054 s on a Ryzen Mobile (6 cores); a rerun on another machine took 0.051 s.
 
 ---
 
 ## 📄 License
 
-MIT
+Mozilla Public License 2.0, see [`LICENSE`](LICENSE).
+
+---
+
+*Keywords: sudoku solver, C, pthreads, OpenMP, multithreading, backtracking, depth-first search, parallel computing, university project.*
